@@ -27,8 +27,9 @@ services:
       - key: VITE_API_BASE_URL
         value: https://receiptstore-backend.onrender.com/api
     routes:
-      - path: /*
-        route: /index.html
+      - type: rewrite
+        source: /*
+        destination: /index.html
 
   - type: web
     name: receiptstore-till-app
@@ -42,5 +43,6 @@ services:
       - key: VITE_TILL_API_KEY
         sync: false
     routes:
-      - path: /*
-        route: /index.html
+      - type: rewrite
+        source: /*
+        destination: /index.html
