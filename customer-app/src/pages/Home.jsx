@@ -5,12 +5,16 @@ import { api } from "../api.js";
 import { formatPence, formatDate } from "../format.js";
 
 export function Home() {
-  const { customer } = useAuth();
+  const { customer, refresh } = useAuth();
   const [recent, setRecent] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
+    // Re-fetch the profile (spend total) every time Home is visited, not
+    // just on first load — otherwise a sale made elsewhere (e.g. at a
+    // till, in another tab) never shows up here until a full page reload.
+    refresh();
     api
       .receipts({ sort: "date_desc" })
       .then((data) => setRecent(data.receipts.slice(0, 5)))
