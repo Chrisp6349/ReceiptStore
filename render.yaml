@@ -1,0 +1,46 @@
+services:
+  - type: web
+    name: receiptstore-backend
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: JWT_SECRET
+        generateValue: true
+      # Shared with both static sites' VITE_TILL_API_KEY below — Render
+      # will prompt for this value once per service when the blueprint is
+      # applied. Use the same value in all three prompts.
+      - key: TILL_API_KEY
+        sync: false
+      - key: CORS_ORIGIN
+        value: https://receiptstore-customer-app.onrender.com,https://receiptstore-till-app.onrender.com
+
+  - type: web
+    name: receiptstore-customer-app
+    runtime: static
+    rootDir: customer-app
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://receiptstore-backend.onrender.com/api
+    routes:
+      - path: /*
+        route: /index.html
+
+  - type: web
+    name: receiptstore-till-app
+    runtime: static
+    rootDir: till-app
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://receiptstore-backend.onrender.com/api
+      - key: VITE_TILL_API_KEY
+        sync: false
+    routes:
+      - path: /*
+        route: /index.html

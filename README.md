@@ -30,6 +30,43 @@ HTTP, the same way they would in a real deployment.
 | `customer-app`| React + Vite                 | 5173 |
 | `till-app`    | React + Vite                 | 5174 |
 
+## Deploying live (Render)
+
+A `render.yaml` [Blueprint](https://render.com/docs/blueprint-spec) at the
+repo root deploys all three services at once — no manual dashboard
+configuration beyond the one-time setup below:
+
+1. Sign in at [dashboard.render.com](https://dashboard.render.com) and
+   connect your GitHub account, granting access to this repo if prompted.
+2. Click **New +** → **Blueprint**, pick this repo. Render reads
+   `render.yaml` and shows all three services (`receiptstore-backend`,
+   `receiptstore-customer-app`, `receiptstore-till-app`).
+3. It will prompt for `TILL_API_KEY` (on the backend) and
+   `VITE_TILL_API_KEY` (on the till app) — these aren't committed to the
+   repo, so pick any random string yourself and **enter the exact same
+   value in both prompts**. `JWT_SECRET` is generated for you.
+4. Click **Apply**. Render builds and deploys all three; first build takes
+   a few minutes.
+
+You'll end up with:
+- `https://receiptstore-customer-app.onrender.com`
+- `https://receiptstore-till-app.onrender.com`
+- `https://receiptstore-backend.onrender.com` (the API — the two apps
+  above already point at it via `VITE_API_BASE_URL` in `render.yaml`)
+
+If Render appends a suffix to any of those names (only happens if the
+plain name is taken), the hardcoded `CORS_ORIGIN` and `VITE_API_BASE_URL`
+values in `render.yaml` won't match anymore — update them to the actual
+assigned URLs and push again to redeploy.
+
+**Known limitations of the free tier**: the backend spins down after 15
+minutes of inactivity (the first request after that takes ~30–60s to wake
+it back up), and its SQLite file is **not persisted** across
+redeploys/restarts — every restart starts from an empty database. Fine
+for demoing the flow; for anything longer-lived, either attach a Render
+persistent disk to the backend service or migrate to a hosted Postgres
+(see [Swapping SQLite for Postgres later](#swapping-sqlite-for-postgres-later)).
+
 ## Prerequisites
 
 Node.js 18+ and npm.
