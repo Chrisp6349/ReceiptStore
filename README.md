@@ -198,6 +198,45 @@ calls for them but are not functional:
 - Category or date filters on Receipts (search, retailer filter and sort are implemented)
 - Receipt Export / Share / Warranty / Return actions (stub buttons on the receipt detail screen)
 
+## Vision & roadmap (not yet built)
+
+Prototype 001 proves the idea in a supermarket, self-checkout setting.
+Two extensions have been discussed but not started:
+
+**Bars and restaurants.** The core loop (identify → link a sale to the
+customer → receipt lands in their app) still holds, but the transaction
+shape changes: instead of the supermarket's one-shot till scan, it needs
+an "open tab → items accrue over the visit → settle" flow, plus tips and
+split-bill handling. Today's data model treats every transaction as one
+atomic, immediately-completed sale, so this is a real schema and flow
+change, not a tweak.
+
+**Card-linking instead of a barcode scan.** The smoothest long-term
+version of ReceiptStore skips the scan entirely: a customer's bank card
+is registered against their ReceiptStore account, so a normal contactless
+tap alone triggers the receipt. UK firms like Bink and CardLinx already do
+this. The important limitation: card network data (Visa/Mastercard/Amex)
+is transaction-level only — merchant, amount, timestamp — and never
+itemized. So card-linking only solves *identifying the customer and
+matching the right sale*; the itemized receipt still has to come from the
+retailer's own EPOS/till system via a separate integration, exactly as
+flagged in "What's deliberately not built" above.
+
+That EPOS integration — not the card-linking piece — is the real
+bottleneck to scaling past a prototype. Modern cloud POS systems (Square,
+Toast, Lightspeed, SumUp, Shopify POS) already expose APIs that could
+supply itemized data with no new till hardware or software. Older or
+bespoke systems, common among independent retailers, would need custom
+middleware or a POS switch. That fragmentation — thousands of different
+POS vendors, most without a clean API — is why real card-linked-receipt
+companies integrate with a handful of major EPOS providers first rather
+than going retailer-by-retailer.
+
+**Current direction:** keep building and demoing Prototype 001's
+scan-based till — it proves the same identify → link → receipt idea
+without needing a bank or EPOS partnership — and treat card-linking as
+the intended longer-term direction rather than near-term scope.
+
 ## Swapping SQLite for Postgres later
 
 The backend's only database-specific code lives in `backend/src/db.js`
